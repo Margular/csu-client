@@ -8,6 +8,7 @@ import platform
 import os
 import re
 import sys
+import getpass
 
 def RSAEncryption(n , d , m):   #n->Modulus , d->Public Exponent , m->Message
     message = ""
@@ -17,8 +18,8 @@ def RSAEncryption(n , d , m):   #n->Modulus , d->Public Exponent , m->Message
     return hex(message**d % n).split('0x')[1]
 
 def login():
-    data = {'accountID' : args.usr + "@zndx.inter" , 
-            'password' : RSAEncryption(n , d , args.pas) ,
+    data = {'accountID' : username + "@zndx.inter" , 
+            'password' : RSAEncryption(n , d , password) ,
             'brasAddress' : '59df7586' ,
             'userIntranetAddress' : ip}
     # 取得cookie
@@ -107,41 +108,34 @@ def logout():
 
 def get_ip_address():
     if 'Linux' in platform.system() or 'Mac' in platform.system():
-        ifconfig = os.popen('ifconfig')
-        ifconfig = ''.join(ifconfig.readlines())
-        if not ifconfig:
-            print('获取IP失败!试试sudo执行?')
-            sys.exit()
-        ip = re.findall(r'(10\.96\.(?!127\.255)(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[1-9]))' , ifconfig)[0][0]
-        return ip
+        config = os.popen('ifconfig')
     elif 'Windows' in platform.system():
-        ipconfig = os.popen('ipconfig')
-        ipconfig = ''.join(ipconfig.readlines())
-        if not ipconfig:
-            print('获取IP失败!试试管理员权限运行?')
-            sys.exit()
-        ip = re.findall(r'(10\.96\.(?!127\.255)(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[1-9]))' , ipconfig)[0][0]
-        return ip
+        config = os.popen('ipconfig')
     else:
         print('未知系统,请手动输入IP地址!')
+        sys.exit(0)
+    config = ''.join(config.readlines())
+    if not config:
+        print('获取IP失败!试试sudo执行?')
+        sys.exit()
+    ip = re.findall(r'(10\.96\.(?!127\.255)(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[1-9]))' , config)[0][0]
+    return ip
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '跨平台数字中南客户端')
-    parser.add_argument('-u' , '--usr' , help = '用户名')
-    parser.add_argument('-p' , '--pas' , help = '密码')
-    parser.add_argument('-o' , '--logout' , help = '注销' , action='store_false' , default = True , dest = 'action')
+    parser.add_argument('-o' , '--logout' , help = '注销' , action='store_true')
     parser.add_argument('-i' , '--ip' , help = '自定义IP')
     args = parser.parse_args()
     n = 0xa8a02b821d52d3d0ca90620c78474b78435423be99da83cc190ab5cb5b9b922a4c8ba6b251e78429757cf11cde119e1eacff46fa3bf3b43ef68ceb29897b7aa6b5b1359fef6f35f32b748dc109fd3d09f3443a2cc3b73e99579f3d0fe6a96ccf6a48bc40056a6cac327d309b93b1d61d6f6e8f4a42fc9540f34f1c4a2e053445
     d = 0x10001
     ip = args.ip if args.ip else get_ip_address()
     print('获取IP为 : %s' % ip)
-    if args.action:
-        if not args.usr or not args.pas:
-            print('请输入用户名和密码!!!')
-            sys.exit()
-        print('正在登录...')
-        login()
-    else:
+    if args.logout:
         print('正在注销...')
         logout()
+    else:
+        username = input("username:")
+        password = getpass.getpass("password:")
+        print('正在登录...')
+        login()
