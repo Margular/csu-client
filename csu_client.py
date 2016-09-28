@@ -135,7 +135,7 @@ if __name__ == '__main__':
         print('正在注销...')
         logout()
     else:
-        username = input("username:")
-        password = getpass.getpass("password:")
+        username = input("username : ")
+        password = getpass.getpass("password : ")
         print('正在登录...')
         login()
