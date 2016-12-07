@@ -1,9 +1,5 @@
 数字中南跨平台登陆器
 
-使用前需要安装argparse这个包:
-
-pip install argparse
-
 WINDOWS : csu_client.py -h    可以显示帮助信息
 
 LINUX : ./csu_client.py -h    同上
